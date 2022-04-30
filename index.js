@@ -1,6 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId, ObjectID } = require("mongodb");
+const {
+  MongoClient,
+  ServerApiVersion,
+  ObjectId,
+  ObjectID,
+} = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -11,7 +16,6 @@ app.use(express.json());
 
 // dbName: dbinventor
 //dbPassword: IcTeYLos5U4Z23bz
-
 
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.0jsmu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -26,9 +30,9 @@ const run = async () => {
     const productCollection = client.db("inventory").collection("product");
 
     // insert product
-    
-    app.post('/product', async (req, res) =>  {
-      const data = req.body
+
+    app.post("/product", async (req, res) => {
+      const data = req.body;
       const product = {
         description: data.description,
         email: data.email,
@@ -37,35 +41,34 @@ const run = async () => {
         price: data.price,
         quantity: data.quantity,
         sold: data.sold,
-        supplier: data.supplier
-      }
+        supplier: data.supplier,
+      };
       const result = await productCollection.insertOne(product);
-      res.send(result)
-    })
-    
+      res.send(result);
+    });
 
     // Get product from database
-    app.get('/products', async (req, res) => {
+    app.get("/products", async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
-      const result =  await cursor.toArray();
-      res.send(result)
-    })
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Find product by id
-    app.get('/inventory/:id', async (req, res) => {
-      const {id} = req.params;
-      const query = { _id: ObjectId(id)};
-      const requlst = await productCollection.findOne(query)
-      res.send(requlst)
-    })
+    app.get("/inventory/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: ObjectId(id) };
+      const requlst = await productCollection.findOne(query);
+      res.send(requlst);
+    });
 
-    // update product quantity 
-    app.put('/inventory/:id', async (req, res) => {
+    // update product quantity
+    app.put("/inventory/:id", async (req, res) => {
       const data = req.body;
       const { id } = req.params;
-      console.log(id)
-      console.log(data)
+      console.log(id);
+      console.log(data);
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
@@ -77,22 +80,23 @@ const run = async () => {
           image: data.image,
           description: data.description,
           supplier: data.supplier,
-          sold: data.sold
+          sold: data.sold,
         },
       };
-      const result = await productCollection.updateOne(filter, updateDoc, options);
-      res.send(result)
+      const result = await productCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
     });
 
-
-
-
-
-
-
-
-
-
+    app.delete("/product/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: ObjectId(id) };
+      const result = await productCollection.deleteOne(query);
+      res.send(result);
+    });
   } finally {
     // await client.close();
   }
