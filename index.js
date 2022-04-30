@@ -24,6 +24,24 @@ const run = async () => {
   try {
     await client.connect();
     const productCollection = client.db("inventory").collection("product");
+
+    // insert product
+    
+    app.post('/product', async (req, res) =>  {
+      const data = req.body
+      const product = {
+        description: data.description,
+        email: data.email,
+        image: data.image,
+        name: data.name,
+        price: data.price,
+        quantity: data.quantity,
+        sold: data.sold,
+        supplier: data.supplier
+      }
+      const result = await productCollection.insertOne(product);
+      res.send(result)
+    })
     
 
     // Get product from database
@@ -34,6 +52,7 @@ const run = async () => {
       res.send(result)
     })
 
+    // Find product by id
     app.get('/inventory/:id', async (req, res) => {
       const {id} = req.params;
       const query = { _id: ObjectId(id)};
