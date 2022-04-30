@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { MongoClient, ServerApiVersion, ObjectId, ObjectID } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -11,7 +12,7 @@ app.use(express.json());
 // dbName: dbinventor
 //dbPassword: IcTeYLos5U4Z23bz
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.0jsmu.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -33,7 +34,36 @@ const run = async () => {
       res.send(result)
     })
 
+    app.get('/inventory/:id', async (req, res) => {
+      const {id} = req.params;
+      const query = { _id: ObjectId(id)};
+      const requlst = await productCollection.findOne(query)
+      res.send(requlst)
+    })
 
+    // update product quantity 
+    app.put('/inventory/:id', async (req, res) => {
+      const data = req.body;
+      const { id } = req.params;
+      console.log(id)
+      console.log(data)
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: data.name,
+          email: data.email,
+          quantity: data.quantity,
+          price: data.price,
+          image: data.image,
+          description: data.description,
+          supplier: data.supplier,
+          sold: data.sold
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc, options);
+      res.send(result)
+    });
 
 
 
