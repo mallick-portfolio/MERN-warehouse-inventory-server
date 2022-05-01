@@ -1,11 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const {
-  MongoClient,
-  ServerApiVersion,
-  ObjectId,
-  ObjectID,
-} = require("mongodb");
+const jwt = require("jsonwebtoken");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -13,6 +9,22 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "unauthorization access" });
+  }
+  const token = authHeader.split(" ");
+  jwt.verify(token[1], process.env.ACCESS_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "forbiden" });
+    }
+    req.decoded = decoded;
+  });
+
+  next();
+};
 
 // dbName: dbinventor
 //dbPassword: IcTeYLos5U4Z23bz
@@ -28,6 +40,16 @@ const run = async () => {
   try {
     await client.connect();
     const productCollection = client.db("inventory").collection("product");
+
+    // auth
+    app.post("/login", function (req, res) {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: "1d",
+      });
+      console.log(user);
+      res.send(token);
+    });
 
     // insert product
 
@@ -53,6 +75,20 @@ const run = async () => {
       const cursor = productCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
+    });
+    // Get product from database
+    app.get("/userProduct", verifyJWT, async (req, res) => {
+      const user = req.query;
+      const decodedEmail = req.decoded.email;
+      console.log(decodedEmail, user.email);
+      if (user.email == decodedEmail) {
+        const query = { email: user.email };
+        const cursor = productCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      } else {
+        res.status(403).send({ message: "forbiden" });
+      }
     });
 
     // Find product by id
