@@ -80,7 +80,7 @@ const run = async () => {
     app.get("/userProduct", verifyJWT, async (req, res) => {
       const user = req.query;
       const decodedEmail = req.decoded.email;
-     
+     console.log(decodedEmail)
       if (user.email == decodedEmail) {
         const query = { email: user.email };
         const cursor = productCollection.find(query);
