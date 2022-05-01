@@ -47,7 +47,7 @@ const run = async () => {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: "1d",
       });
-      console.log(user);
+      
       res.send(token);
     });
 
@@ -80,7 +80,7 @@ const run = async () => {
     app.get("/userProduct", verifyJWT, async (req, res) => {
       const user = req.query;
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail, user.email);
+     
       if (user.email == decodedEmail) {
         const query = { email: user.email };
         const cursor = productCollection.find(query);
@@ -91,7 +91,7 @@ const run = async () => {
       }
     });
 
-    // Find product by id
+    // Find product by id 
     app.get("/inventory/:id", async (req, res) => {
       const { id } = req.params;
       const query = { _id: ObjectId(id) };
@@ -103,8 +103,7 @@ const run = async () => {
     app.put("/inventory/:id", async (req, res) => {
       const data = req.body;
       const { id } = req.params;
-      console.log(id);
-      console.log(data);
+      
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updateDoc = {
