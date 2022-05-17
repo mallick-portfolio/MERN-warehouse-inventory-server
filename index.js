@@ -79,7 +79,7 @@ const run = async () => {
     // Get product from database
     app.get("/userProduct", verifyJWT, async (req, res) => {
       const user = req.query;
-      const decodedEmail = req.decoded.email;
+      const decodedEmail = req?.decoded?.email;
      console.log(decodedEmail)
       if (user.email == decodedEmail) {
         const query = { email: user.email };
